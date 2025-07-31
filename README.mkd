@@ -1,0 +1,337 @@
+# Pocket Digital Expenses Tracker
+
+## 📑 Index
+
+- [1. Project Overview](#1-project-overview)
+- [2. Design and Implementation](#2-design-and-implementation)
+- [3. Code](#3-code)
+- [4. Troubleshooting and Testing](#4-troubleshooting-and-testing)
+- [5. Setup Tutorial](#5-setup-tutorial)
+- [6. Device Operation](#6-device-operation)
+- [7. Demonstration](#7-demonstration)
+- [8. Documentation and References](#8-documentation-and-references)
+- [9. Self-Assessment and Reflection](#9-self-assessment-and-reflection)
+
+
+## 1. Project Overview
+
+Tracking daily expenses can be a hassle. While banking apps offer some tools, they often overcomplicate the process and remain siloed: transactions from one account aren’t integrated with another, and cash purchases go unrecorded. To simplify and streamline expense tracking, the ***Pocket Digital Expenses Tracker*** is designed to be lightweight and lightning-fast - cloud-based - financial tracking system, launching and running in mere seconds.
+
+---
+
+## 2. Design and Implementation
+
+
+### Motivation for Project
+Back in January of 2024, I (Nawar) was constantly stressed about overspending and would skip even worthwhile purchases just to play it safe. To get a clearer picture of my budgetting, I decided to track every expense for a month, splitting them into three simple categories: groceries, transport, and leisure. The results surprised me: I was averaging £250 on groceries, £40 on transport, and £40 on leisure each month.
+
+To keep things going, I created a Google Sheet called "money" and logged every single purchase, day in and day out, with set budgets for each categories and a total budget of £400 per month (minus rent). It worked, but not without friction. Loading the sheet could be slow, and if I didn’t have my phone on me, I’d miss entries altogether. Those little gaps chipped away at my consistency and added more hassle than they removed.
+
+![Example budget spreadsheet from 2024-2025](./images/motivation.PNG)
+
+That’s why we’ve developed a dedicated, expenses tracking software for the unPhone: a lightweight, purpose-built app that automates the process of expense entry and tracking, and is in sync with a private cloud database (Google Sheets). No more slow spreadsheets or missed logging — it’s budgeting on the go, made as convenient and reliable as possible.
+
+
+**Main Objectives (What this Project Will Do):**
+- Build a pocket-sized device that tracks daily expenses and enforces set spending budgets.
+- Enable categorisation of expenses into three to four categories based on typical daily spending habits.
+- Keep the interface and feature set minimal, focusing only on essential functionality for practical, everyday use.
+- Store information in a private, online database.
+
+**Additional Objectives (What this Project Could Do):**
+- Display financial analytics such as progress bars and spending trends within the database.
+- Allow users to archive spendings for trend analyses.
+- Allow expenses to be entered offline and synced with the database when the device is connected to the internet.
+
+**Scope (What This Project Will _Not_ Do):**
+- Allow users to edit the current budget from the unPhone (this enforces sticking to the budget).
+- Include elaborate, animation-heavy graphical interfaces that could slow navigation or drain the battery.
+- Have multi-user or shared-account functionality.
+- Have automated receipt-scanning or OCR (amounts and categories are enetered and selected manually).
+- Integrate with bank-accounts.
+
+## IoT Device Capabilities Demonstrated
+
+- **Embedded system design:** A system small enough to slip in a pocket, yet always synced with the cloud database (Google Sheets) when powered, for up-to-date budgets and expense records.  
+- **Internet connectivity:** All budget calculations and aggregate summaries execute on the private Google Sheet, offloading heavy computation from the device and ensuring performance consistency across sessions.  
+- **Google Sheets API:** Utilised the [ESP-Google-Sheet-Client](https://docs.arduino.cc/libraries/esp-google-sheet-client/) library to communicate with the Google Sheet, allowing for automatic integration with the spreadsheets.  
+- **Touch screen & LVGL:** A streamlined menu navigated by a few buttons and a small touchscreen, so entering a new expense, switching categories, or checking reseting budgets takes no more than a few clicks.  
+- **Seamless data sync:** Each entry is pushed to and retrieved from the secure online Google Sheet when connected to the internet.
+
+### Hardware Components Used (unPhone 9)
+  - **Touch-screen:** to type in expenses and archive spending data.
+  - **Buttons 1 & 2 (bottom and middle):** to flick between screens.
+  - **Button 3 (top):** to input expense into database.
+  - **ESP32-D0WDQ6 (WiFi chip):** to enable WiFi connectivity to the database.
+
+  Unfortunately, the system cannot be run on the unPhone 7 due to memory issues when running **LVGL** :c
+
+# System Architecture and Design
+
+## Overall Dataflow Diagram
+![Dataflow diagram](./images/dataflow_diagram.PNG)
+
+## System State Machine Diagram
+![System state machine diagram](./images/design.PNG)
+
+### Buttons:
+- **Add expense**: logs expense into the Google Sheet for storage and calculations.
+- **Archive and reset**: resets the totals to their original values, and archives the previous period's spendings for trend analyses.
+
+## Control Flow Diagrams
+![Control flow diagrams](./images/control_flow_diagrams.png)
+
+### System GUI Mockups
+![System UI screen mockups](./images/mock_ups.png)
+
+---
+
+## unPhone GUI Implementation
+![Groceries Screen](./images/groceries.PNG)
+![Lesiure Screen](./images/leisure.PNG)
+![Travel Screen](./images/travel.PNG)
+![Other Screen](./images/other.PNG)
+
+![Archive Screen](./images/archive.PNG)
+
+### Google Sheet Examples
+![Main Page](./images/page_1.PNG)
+![Archive Page](./images/page_2.PNG)
+
+
+## Implementation Details
+
+### Hardware Setup
+
+The unPhone was built following the basic instructions by Hamish Cunningham, and the unPhone platform was configured as per the unPhone library's [README](https://gitlab.com/hamishcunningham/unphonelibrary/-/blob/main/README.mkd?ref_type=heads) file's setup instructions for the [Arduino 1.8.9 IDE](https://www.arduino.cc/en/software/#legacy-ide-18x).
+
+### Libraries Used
+
+- **[unPhone library](https://gitlab.com/hamishcunningham/unphonelibrary):** Provides hardware interfacing support for building applications on the unPhone IoT platform.  
+- **[LVGL](https://docs.lvgl.io/master/index.html):** Used to build the device's graphical user interface with support for touch input and simple visual elements.  
+- **[Google Sheets API](https://docs.arduino.cc/libraries/esp-google-sheet-client/):** Enables communication with Google Sheets via the ESP-Google-Sheet-Client library for cloud-based data storage and processing.
+
+
+---
+
+## 3. Code
+Written in *C++*, compiled and uploaded onto the unPhone using the [Arduino 1.8.9 IDE](https://www.arduino.cc/en/software/#legacy-ide-18x).
+
+### Functionality
+Boots and runs seamlessly on the unPhone device, allowing numerical expense values to be entered and transmitted via WiFi to a Google Sheet that calculates the total remaining budget and sends it back to the device. Infographics — a remaining budget progress chart and a monthly expenses bar chart — are displayed directly on the Google Sheet, with the ability to archive data when desired.
+
+### Code Quality
+Code maintains a coherent structure by declaring variables and functions at the top in logical groups, complemented by clear inline comments to aid in understanding. A consistent `snake_case` naming convention is applied throughout the code as well.
+
+---
+
+## 4. Troubleshooting and Testing
+
+### *Troubleshooting tips*
+
+**Changes on Spreadsheet Don’t Appear on unPhone**  
+  If you update values in your Google Sheet while the unPhone is powered on, those changes won’t automatically propagate. Simply power-cycle the device (turn it off, then on) to force a full sync with the spreadsheet.
+
+**GUI Unresponsive at Boot**  
+  During initial network setup, the touchscreen and buttons may not respond until Wi-Fi is connected. Make sure the unPhone is online - once it joins your network, the UI will become interactive.
+
+**“GSHEET not ready” Error**  
+  1. Verify your spreadsheet ID in `private.h`.  
+  2. Confirm that your Google Service Account credentials (private key, client email, project ID) are correct.  
+  3. Ensure the spreadsheet is shared with `client email`.
+  4. Re-upload `private.h` to the device and reboot.
+
+**Google Sheets Library Initialisation Fails**  
+  Double-check the entries in `private.h` for:  
+  - **Spreadsheet ID**  
+  - **Private key**  
+  - **Client email**  
+  - **Project ID**
+
+**Wi-Fi Connection Issues**  
+  1. Open `private.h`.  
+  2. Ensure **SSID** and **password** match your network.  
+  3. Confirm your router or hotspot is powered on and within range.
+
+**Missing `private.h` Warning**  
+  If you see “`private.h` is missing, copy `private-template.h` and fill it in,” follow the setup instructions:  
+  1. Duplicate `private-template.h` as `private.h`.  
+  2. Populate it with your Google Sheets and Wi-Fi credentials.  
+  3. Recompile and upload.
+
+**General Debugging Tips**  
+  Always have the Serial Monitor open at **115200 baud** to review detailed error messages as the device boots and runs. This will help you pinpoint configuration typos or connection failures.
+
+  *Ensure adherance to all setup instructions properly.*
+
+---
+
+### *Testing Strategy*
+
+- **User-based testing**  
+  - Manually enter expenses on-device, verify they appear instantly in the unPhone UI, then confirm real-time sync to the Google Sheet.  
+  - Test reseting and archiving: inputs cleared, labels reset on both main and archive screens, and historic records appended to sheet2 of the spreadsheet.  
+- **Stress testing**  
+  - Rapid-fire input of dozens of expense entries in under a minute to check for input queueing or data loss.  
+  - Extreme values (e.g. £1,000,000 or “0.0001”) to ensure numeric parsing remains stable and negative balances display correctly.  
+- **Boundary and validation checks**: Restrict keypad to numerical values (to ensure no input of erroneous characters such as letters and symbols, and to increase security), and enforce maximum length limits.  
+- **Connectivity disruption tests**  
+  - Simulate intermittent Wi-Fi dropouts and ensure the device is consistent with all inputted expenses, has no data loss and can reconnect and continue as per usual. 
+- **Usability and acceptance testing**  
+  - Conduct informal sessions with 5–10 users to gauge ease of entry, menu navigation, and overall satisfaction.
+  - Time-to-entry benchmarks: goal of under 5 seconds from “add expense” to "uploaded to sheets”.  
+
+### Test Results and Observations
+
+- **Core workflows**  
+  - Expense entry, category selection, and cloud sync all functioned flawlessly across "Groceries", ”Travel", ”Leisure”, and “Other.”  
+  - Archive and reset routines now correctly refresh labels on both screens after we added an explicit `update_archive_totals()` call.
+- **Data visualisation**
+  - Progress bar, archive bar chart and averages all update correctly.
+  - Cells turn **RED** when gone overbudget.
+- **Offline behaviour**: Data persists correctly across different instances of system use sessions.
+- **Performance under load**: No data loss during rapid-fire inputs; however, the touch­screen did occasionally miss tap registers when under heavy input rates.
+
+### Challenges and Issues Identified
+
+- Touchscreen responsiveness varied: sometimes unresponsive or registering multiple touches.  
+  - Light touches or tapping a different area straight after the desired input would usually remove this issue.  
+- Device requires constant internet access to push and retrieve spendings data.  
+- Identified bug where all labels were not updated when resetting and archiving. Labels on the main page would update, but the totals on the archive page were not being updated.  
+  - A function to update the archive page labels was implemented as a fix.  
+
+
+### Improvements to Testing and Validation
+
+- **Automated unit and integration tests**: Set up basic tests (e.g. mocking Google Sheets responses, input validation) to catch bugs before pushing to the device. Run them through a simple CI setup.  
+- **Improved logging and diagnostics**: Add more detailed outputs to Serial Monitor, such as sync latency, and battery levels to make debugging quicker.  
+- **More structured user testing**: Use short questionnaires and screen recordings to get proper feedback on usability — helps spot pain points that would be missed by the developers. 
+- **Hardware-in-the-loop (HIL) testing**: Use a touchscreen emulator and Wi-Fi disruption tools (e.g. `tc` on Linux) to simulate ghost touches and flaky internet - makes it easier to repeat test cases.  
+- **Switch to PlatformIO**: Move away from Arduino IDE. PlatformIO gives multithreaded compiling, keeps build times under 2 minutes, and supports proper testing frameworks out of the box.  
+
+
+---
+
+## 5. Setup Tutorial
+### Arduino IDE/unPhone9
+1. Install the [Arduino IDE](https://www.arduino.cc/en/software/#legacy-ide-18x). Use version 1.8.19 as it is more stable and secure.
+2. Within the IDE, install the [Arduino ESP32 Core](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html) by Esspressif.
+3. And the `unPhoneLibrary` from `Tools` > `Manage Libraries` to search and install the `unPhoneLibrary`. For installing libraries within the Arduino IDE, refer to [this](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html) guide.
+4. Finally, in the `Arduino/libraries` directory, and unzip [library9.zip](https://gitlab.com/hamishcunningham/unphone/-/raw/master/libraries9.zip).
+
+### Google Service Account
+1. Go to [Google Cloud Console](https://console.cloud.google.com/projectselector2/iam-admin/settings), and login.
+2. Create a new project.
+3. Give a name to it.
+4. Click create
+5. Once project is created successfully, create a service account by clicking `Service accounts` on the left sidebar then click on `+ CREATE SERVICE ACCOUNT`.
+6. Give it a name, then click `CREATE AND CONTINUE`.
+7. Select `Owner` as the service account role, then continue.
+8. Finally, click `DONE`.
+
+To create a key, first:
+1. Select the project, click on the three dots on the right and select `Manage keys`, then `Create new key`.
+2. Then, select `JSON` and click `Create`. This will download a JSON file to your computer.
+3. Open the file, and make a note of the following. You'll need them later.
+   1. `project_id`
+   2. `client_email`
+   3. `private_key`
+4. Visit the [following link](https://console.cloud.google.com/apis/library/sheets.googleapis.com) and enable the Google Sheets API. *Note: you have to be logged into the same account containing the created project*.
+5. Do the same for the [Google Drive API](https://console.cloud.google.com/apis/library/drive.googleapis.com).
+
+### Google Sheets API Client
+1. Install the `ESP_Google_Sheets_Client` (link to [repository](https://github.com/mobizt/ESP-Google-Sheet-Client)) within the Arduino IDE.
+
+
+### Google Sheet Preparation
+1. Create a copy of this [template spreadsheet](https://docs.google.com/spreadsheets/d/1Gn1lDTGWwMDj5veBBUkZTkf20sMVUg3WHsAnv4heJVA/edit?usp=sharing).
+2. On the top right, click `Share` and share your spreadsheet with the `client_email`you copied from the JSON earlier.
+3. Make a note of the `spreadsheet ID` from the URL, which would be from the `d/` up to - but not including - the next `/`. So, for example, from this URL https://docs.google.com/spreadsheets/d/1hEx0TbmXwLjqj8G8RVdCeKrRfB-rXDGiyEoZnPJTyVE/edit?gid=704530392#gid=704530302 the **ID** would be `1hEx0TbmXwLjqj8G8RVdCeKrRfB-rXDGiyEoZnPJTyVE`.
+
+Feel free to edit budget values according to your monthly spending preferences.
+
+
+### Private.h Initialisation
+1. Create a copy of the `private-template.h` file.
+2. Fill in the "replace" sections with the corresponding information which you've noted down throughout the earlier steps.
+---
+
+## 6. Device Operation
+
+### Adding an Expense
+1. Navigate to the desired category using Buttons 1 and 2. 
+2. Click on the text area and enter the cost of the expense using the on-screen keypad.
+3. Press Button 3 to input the expense
+4. The device and spreadsheet will display the updates to the total spent and remaining budgets accordingly. 
+
+### Archiving Expenses
+1. Navigate to the archive screen using Buttons 1 and 2. 
+2. Click on the on-screen `Archive and reset totals` button.
+3. The total spent for that period will be archived in `Sheet 2` of the spreadsheet, along with the respective data chart updated. 
+4. All category totals and remaining budgets will be reset on both the unPhone and the spreadsheet.
+
+## 7. Demonstration
+
+[Demonstration Video Link](https://youtu.be/GILPAphpMCY?si=yqW40vzdBu3giEWX)
+*Turn on captions!!!*
+
+---
+
+## 8. Documentation and References
+
+Documentation, in the form of a README file, was written in Markdown (`README.mkd`) to satisfy course requirements, and includes inline links to APIs and libraries for quick reference.
+
+### Relevant API and Library References
+
+- **Arduino IDE Libraries:** [Installing Libraries in Arduino IDE](https://docs.arduino.cc/software/ide-v1/tutorials/installing-libraries/)  
+- **unPhone library:** [unPhone Library on GitLab](https://gitlab.com/hamishcunningham/unphonelibrary)  
+- **Arduino ESP32 Core:** [Installing Arduino ESP32 Core](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html#installing-using-arduino-ide)  
+- **LVGL:** [LVGL Documentation](https://docs.lvgl.io/master/index.html)
+- **Google Sheet Client Library:** [ESP Google Sheets Client](https://docs.arduino.cc/libraries/esp-google-sheet-client/)
+  - For reference to the Google Sheets API, please see the documentation [here](https://developers.google.com/workspace/sheets/api/reference/rest).
+
+### Supporting Materials and Course Readings
+
+- [*Mi Casa Su Botnet*](https://iot.unphone.net/)
+
+---
+
+## 9. Self-Assessment and Reflection
+
+### What Went Well
+
+- Core functionality was implemented early in the development cycle and runs reliably under standard usage conditions, including cloud sync and category-based tracking.  
+- Effective use of external libraries such as [LVGL](https://docs.lvgl.io/master/index.html), [unPhone](https://gitlab.com/hamishcunningham/unphonelibrary), and the [Google Sheets API](https://docs.arduino.cc/libraries/esp-google-sheet-client/) accelerated development and reduced the need for building low-level functions from scratch.  
+- Device remains stable during long usage sessions, with smooth switching between categories and accurate syncing with the online spreadsheet.
+
+### What Did Not Go Well
+
+- Touchscreen calibration proved difficult and negatively impacted usability testing. Inconsistent touch response meant users occasionally struggled to input data or navigate menus.  
+- The resistive (pressure-based) touchscreen was particularly prone to registering ghost touches—especially when the screen was even slightly pressed against a surface (like a desk or bag lining). A capacitive screen would have prevented these issues, offering more precise input and a smoother user experience.  
+- Real-time feedback on data sync status was limited, as users could not easily tell if a transaction was successfully uploaded or if an internet issue had occurred.
+
+### Lessons Learned
+
+- Early hardware validation is essential, small issues like touchscreen performance or physical button bounce can become major problems later in development.  
+- Separating core functionality from UI logic improves maintainability, especially when trying different interaction methods (e.g. button vs touch navigation).  
+- A reliable debug system (Serial Monitor logging) saves hours of time during testing. Error feedback should be clear and frequent, especially in hardware-software integration projects.
+- While robust and reliable, development using the Arduino IDE was significantly slowed down by long compilation times. Each full build would often take 10–15 minutes, especially when building from scratch. This is largely due to Arduino’s single-threaded compilation process and the lack of effective caching. Even minor code edits required full recompilation, which introduced a lot of idle time during development. Moving to a modern development environment like PlatformIO would have addressed many of these issues — PlatformIO supports parallel compilation using multiple CPU cores and has intelligent caching mechanisms that avoid recompiling unchanged files. It also integrates well with version control and allows easier debugging, making it more suitable for larger or more complex embedded projects like this one.
+
+### Future Work and Improvements
+
+- **Barcode scanning integration:**  
+  Implementing a barcode scanner could dramatically improve input speed. This would require access to a product database from a specific supermarket chain. Once scanned, product costs could be fetched and logged automatically — minimising manual entry and reducing user error, and augmenting the device's versatility.  
+
+- **Porting to a wearable (e.g. LilyGO T-Watch-2021 or T-Watch 3):**  
+  The unPhone’s form factor is still slightly bulky for daily carry. Porting the interface to a smartwatch platform like the LilyGO T-Watch would improve accessibility and comfort. Expenses could be entered via a wrist-mounted UI, making the tracking process even more effortless.
+
+- **Voice command input:**  
+  Adding a microphone and basic voice control could allow users to add expenses or switch categories without using the touchscreen or buttons. A simple “Add coffee three pounds” command would log the item directly — useful when walking or commuting.
+
+- **More informative UI feedback:**  
+  Adding visual or haptic confirmation after syncing (e.g. a green tick or vibration) would make the system more user-friendly and transparent.
+
+- **Offline mode:**  
+  Currently, the system depends on live connectivity to Google Sheets. Introducing a local buffer for temporary offline logging, which syncs once internet connction returns, would improve reliablility and flexibility in real-world scenarios.
+
+---
